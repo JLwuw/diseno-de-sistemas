@@ -1,5 +1,5 @@
 from character_factory import CharacterFactory
-from character import CharacterEnum
+from character import CharacterEnum, Character
 from abc import ABC, abstractmethod
 from enum import Enum
 
@@ -9,30 +9,32 @@ class GenreEnum(Enum):
 
 
 class GenreFactory(ABC):
+    @staticmethod
     @abstractmethod
-    def create_player(name):
+    def create_player(name, difficulty=None) -> Character:
         pass
 
+    @staticmethod
     @abstractmethod
-    def create_enemy(name):
+    def create_enemy(name, difficulty=None) -> Character:
         pass
 
 
-class FantasyFactory:
+class FantasyFactory(GenreFactory):
     @staticmethod
-    def create_player(name):
-        return CharacterFactory.create(CharacterEnum.WARRIOR, name)
+    def create_player(name, difficulty=None) -> Character:
+        return CharacterFactory.create(CharacterEnum.WARRIOR, name, difficulty)
 
     @staticmethod
-    def create_enemy(name):
-        return CharacterFactory.create(CharacterEnum.DRAGON, name)
+    def create_enemy(name, difficulty=None) -> Character:
+        return CharacterFactory.create(CharacterEnum.DRAGON, name, difficulty)
 
 
-class SciFiFactory:
+class SciFiFactory(GenreFactory):
     @staticmethod
-    def create_player(name):
-        return CharacterFactory.create(CharacterEnum.SOLDIER, name)
+    def create_player(name, difficulty=None) -> Character:
+        return CharacterFactory.create(CharacterEnum.SOLDIER, name, difficulty)
 
     @staticmethod
-    def create_enemy(name):
-        return CharacterFactory.create(CharacterEnum.ALIEN, name)
+    def create_enemy(name, difficulty=None) -> Character:
+        return CharacterFactory.create(CharacterEnum.ALIEN, name, difficulty)

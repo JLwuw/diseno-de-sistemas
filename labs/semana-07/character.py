@@ -2,13 +2,19 @@ from abc import ABC
 from enum import Enum
 
 class Character(ABC):
-    def __init__(self, name: str, hp: int, damage: int):
+    def __init__(self, name: str, hp: int, damage: int, difficulty=None):
         self.name = name
         self.hp = hp
         self.damage = damage
 
+        if difficulty:
+            self.hp *= difficulty
+            self.damage *= difficulty
+
     def take_damage(self, damage: int):
         self.hp -= damage
+        self.hp = max(self.hp, 0)
+        print(f"{self.name} toma {damage} daño! Le queda {self.hp} de vida")
 
 
 class CharacterEnum(Enum):
@@ -19,28 +25,28 @@ class CharacterEnum(Enum):
 
 
 class Warrior(Character):
-    def __init__(self, name: str):
-        hp = 20
+    def __init__(self, name: str, difficulty=None):
+        hp = 30
         damage = 10
-        super().__init__(name, hp, damage)
+        super().__init__(name, hp, damage, difficulty)
 
 
 class Dragon(Character):
-    def __init__(self, name: str):
+    def __init__(self, name: str, difficulty=None):
         hp = 40
-        damage = 30
-        super().__init__(name, hp, damage)
+        damage = 5
+        super().__init__(name, hp, damage, difficulty)
 
 
 class Soldier(Character):
-    def __init__(self, name: str):
-        hp = 15
-        damage = 20
-        super().__init__(name, hp, damage)
+    def __init__(self, name: str, difficulty=None):
+        hp = 30
+        damage = 9
+        super().__init__(name, hp, damage, difficulty)
 
 
 class Alien(Character):
-    def __init__(self, name: str):
+    def __init__(self, name: str, difficulty=None):
         hp = 25
-        damage = 15
-        super().__init__(name, hp, damage)
+        damage = 5
+        super().__init__(name, hp, damage, difficulty)
