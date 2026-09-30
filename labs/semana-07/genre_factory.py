@@ -1,17 +1,38 @@
 from character_factory import CharacterFactory
 from character import CharacterEnum
+from abc import ABC, abstractmethod
+from enum import Enum
 
+class GenreEnum(Enum):
+    FANTASY = 0
+    SCIFI = 1
+
+
+class GenreFactory(ABC):
+    @abstractmethod
+    def create_player(name):
+        pass
+
+    @abstractmethod
+    def create_enemy(name):
+        pass
 
 
 class FantasyFactory:
-    def create(warrior_name, dragon_name):
-        warrior = CharacterFactory.create(CharacterEnum.WARRIOR, warrior_name)
-        dragon = CharacterFactory.create(CharacterEnum.DRAGON, dragon_name)
-        return warrior, dragon
+    @staticmethod
+    def create_player(name):
+        return CharacterFactory.create(CharacterEnum.WARRIOR, name)
+
+    @staticmethod
+    def create_enemy(name):
+        return CharacterFactory.create(CharacterEnum.DRAGON, name)
 
 
 class SciFiFactory:
-    def create(soldier_name, alien_name):
-        soldier = CharacterFactory.create(CharacterEnum.SOLDIER, soldier_name)
-        alien = CharacterFactory.create(CharacterEnum.ALIEN, alien_name)
-        return soldier, alien
+    @staticmethod
+    def create_player(name):
+        return CharacterFactory.create(CharacterEnum.SOLDIER, name)
+
+    @staticmethod
+    def create_enemy(name):
+        return CharacterFactory.create(CharacterEnum.ALIEN, name)

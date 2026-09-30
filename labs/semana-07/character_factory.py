@@ -7,7 +7,8 @@ from character import (
 )
 
 class CharacterFactory:
-    def create(character_type: CharacterEnum, name):
+    @staticmethod
+    def create(character_type: CharacterEnum, name: str):
         if character_type == CharacterEnum.WARRIOR:
             return Warrior(name)
         

@@ -10,13 +10,9 @@ def main():
         menu_choice = int(input("Escoge una opcion [1, 2]: "))
 
         if int(menu_choice) == 1:
-            player = GameFacade.create_player(GenreEnum.FANTASY)
-            enemy = GameFacade.create_enemy(GenreEnum.FANTASY)
             break
         
         elif int(menu_choice) == 2:
-            player = GameFacade.create_player(GenreEnum.SCIFI)
-            enemy = GameFacade.create_enemy(GenreEnum.SCIFI)
             break
 
         else:
