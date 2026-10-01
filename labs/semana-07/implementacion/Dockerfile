@@ -4,4 +4,4 @@ WORKDIR /app
 
 COPY . .
 
-CMD ["python", "game-patterns.py"]
+CMD ["python", "main.py"]
