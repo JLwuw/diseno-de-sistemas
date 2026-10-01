@@ -32,7 +32,7 @@ class GameFacade:
 
     @staticmethod
     def create_characters(genre: GenreEnum) -> tuple[Character, Character]:
-        config = GameConfig.get_instace()
+        config = GameConfig.get_instance()
         player_name = str(input("\nNombre de tu personaje: "))
         enemy_name = str(input("Nombre del enemigo: "))
 
@@ -109,7 +109,7 @@ class GameFacade:
     @staticmethod
     def combat(player: Character, enemy: Character):
         turn_counter = 1
-        config = GameConfig.get_instace()
+        config = GameConfig.get_instance()
         print("\nEmpieza el combate!")
         sleep(1)
 

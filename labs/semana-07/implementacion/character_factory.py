@@ -19,7 +19,7 @@ class CharacterFactory:
         elif character_type == CharacterEnum.SOLDIER:
             return Soldier(name, difficulty)
 
-        elif CharacterEnum.ALIEN:
+        elif character_type == CharacterEnum.ALIEN:
             return Alien(name, difficulty)
         
         else:

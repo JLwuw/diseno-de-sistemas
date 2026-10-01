@@ -7,7 +7,7 @@ class GameConfig:
         self.max_turns = 5
 
     @staticmethod
-    def get_instace() -> GameConfig:
+    def get_instance() -> GameConfig:
         if GameConfig._instance is None:
             GameConfig._instance = GameConfig()
 
