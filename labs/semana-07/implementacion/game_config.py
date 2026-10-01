@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 
 class GameConfig:
     _instance = None
