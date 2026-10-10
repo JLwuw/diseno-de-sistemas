@@ -31,7 +31,7 @@ RF-07 through 18 and NFR-06 through 07 are new
 ### Administrative Blocks
 
 - **RF-13:** The system must allow Sports Complex administrators to create reusable blocking templates containing a time, motive, and optional equipment.
-- **RF-14:** The system must allow an administrator to apply a blocking template to any court and date.
+- **RF-14:** The system must allow an administrator to apply a blocking template to any court and time.
 - **RF-15:** Applying a block must override any preexisting reservation for the selected court and time.
 - **RF-16:** If a block overrides an existing reservation, the system must notify the reservation creator.
 
