@@ -3,20 +3,27 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 from datetime import datetime
 from datetime import timedelta
-from enum import Enum
+from enum import IntEnum
 from typing import TYPE_CHECKING, Any, Optional
 
-from cancellation import *
+from campus import CampusEnum
 
 if TYPE_CHECKING:
     from user import Student
 
+from cancellation import (
+    AdminCancellation,
+    CancellationPolicy,
+    CaptainCancellation,
+    StudentCancellation,
+)
 
-class ReservationStatus(Enum):
-    ACTIVE = "active"
-    FINISHED = "finished"
-    CANCELLED = "cancelled"
-    NO_SHOW = "no-show"
+
+class ReservationStatus(IntEnum):
+    ACTIVE = 0
+    FINISHED = 1
+    CANCELLED = 2
+    NO_SHOW = 3
 
 
 class Reservation(ABC):
@@ -24,17 +31,19 @@ class Reservation(ABC):
         self,
         student: Student,
         court: Any,
-        start_time: datetime,
-        end_time: datetime,
+        campus: CampusEnum,
+        start_datetime: datetime,
+        end_datetime: datetime,
         requested_at: datetime,
         cancellation_policy: CancellationPolicy,
     ) -> None:
-        if end_time <= start_time:
+        if end_datetime <= start_datetime:
             raise ValueError("The reservation must end after it starts.")
         self.student = student
         self.court = court
-        self.start_time = start_time
-        self.end_time = end_time
+        self.campus = campus
+        self.start_datetime = start_datetime
+        self.end_datetime = end_datetime
         self.requested_at = requested_at
         self.status = ReservationStatus.ACTIVE
         self.cancellation_policy = cancellation_policy
@@ -49,11 +58,13 @@ class Reservation(ABC):
             policy=AdminCancellation()
         )
 
-    def finish(self, current_time: datetime) -> None:
+    def finish(self, current_datetime: datetime) -> None:
         if self.status is not ReservationStatus.ACTIVE:
             raise ValueError("Only active reservations can be finished.")
-        if current_time < self.end_time:
+        
+        if current_datetime < self.end_datetime:
             raise ValueError("A reservation cannot finish before its end time.")
+        
         self.status = ReservationStatus.FINISHED
 
     def is_active(self) -> bool:
@@ -62,14 +73,14 @@ class Reservation(ABC):
     def overlaps(self, start_time: datetime, end_time: datetime) -> bool:
         return (
             self.is_active()
-            and start_time < self.end_time
-            and end_time > self.start_time
+            and start_time < self.end_datetime
+            and end_time > self.start_datetime
         )
 
     def __str__(self) -> str:
         return (
             f"{self.student.email} on {self.court.name} "
-            f"({self.start_time:%H:%M}-{self.end_time:%H:%M}, "
+            f"({self.start_datetime:%H:%M}-{self.end_datetime:%H:%M}, "
             f"{self.status.value})"
         )
 
@@ -79,12 +90,13 @@ class StudentReservation(Reservation):
         self,
         student: Student,
         court: Any,
+        campus: CampusEnum,
         start_time: datetime,
         end_time: datetime,
         requested_at: datetime,
     ) -> None:
         cancellation_policy = StudentCancellation()
-        super().__init__(student, court, start_time, end_time, requested_at, cancellation_policy)
+        super().__init__(student, court, campus, start_time, end_time, requested_at, cancellation_policy)
 
 
 class CaptainReservation(Reservation):
@@ -92,9 +104,10 @@ class CaptainReservation(Reservation):
         self,
         student: Student,
         court: Any,
+        campus: CampusEnum,
         start_time: datetime,
         end_time: datetime,
         requested_at: datetime,
     ) -> None:
         cancellation_policy = CaptainCancellation()
-        super().__init__(student, court, start_time, end_time, requested_at, cancellation_policy)
+        super().__init__(student, court, campus, start_time, end_time, requested_at, cancellation_policy)

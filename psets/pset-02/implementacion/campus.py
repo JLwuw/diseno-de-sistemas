@@ -1,9 +1,21 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 from datetime import time
+from enum import IntEnum
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from user import User
+
+class CampusEnum(IntEnum):
+    NORTH = 0
+    SOUTH = 1
+
 
 class TimeValidator(ABC):
-    @abstractmethod
     @staticmethod
+    @abstractmethod
     def validate(time: time) -> bool:
         pass
 
@@ -33,32 +45,34 @@ class SouthCampusTimeValidator(TimeValidator):
 
 
 class NotificationSender(ABC):
-    @abstractmethod
     @staticmethod
-    def send_notification(message: str) -> None:
+    @abstractmethod
+    def send_notification(user: User, message: str) -> None:
         pass
 
 
 class NorthCampusNotificationSender(NotificationSender):
     @staticmethod
-    def send_notification(message: str) -> None:
-        print("Email: " + message)
+    def send_notification(user: User, message: str) -> None:
+        print("Email: " + user.email)
+        print("Message: " + message)
 
 
 class SouthCampusNotificationSender(NotificationSender):
     @staticmethod
-    def send_notification(message: str) -> None:
-        print("Text Message: " + message)
+    def send_notification(user: User, message: str) -> None:
+        print("Text Message: " + user.phone_number)
+        print("Message: " + message)
 
 
 class CampusFactory(ABC):
-    @abstractmethod
     @staticmethod
+    @abstractmethod
     def get_time_validator() -> TimeValidator:
         pass
 
-    @abstractmethod
     @staticmethod
+    @abstractmethod
     def get_notification_sender() -> NotificationSender:
         pass
 

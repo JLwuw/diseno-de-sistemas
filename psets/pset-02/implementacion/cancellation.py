@@ -4,27 +4,62 @@ from abc import ABC, abstractmethod
 from datetime import datetime
 from typing import TYPE_CHECKING
 
+from system_config import SystemConfig
+from reservation import ReservationStatus
+
 if TYPE_CHECKING:
     from reservation import Reservation
 
 
 class CancellationPolicy(ABC):
-    @abstractmethod
     @staticmethod
+    def _validate_active(reservation: Reservation) -> None:
+        if reservation.status is not ReservationStatus.ACTIVE:
+            raise ValueError("Only active reservations can be cancelled.")
+
+    @staticmethod
+    def _validate_before_start(reservation: Reservation, current_datetime: datetime) -> None:
+        if current_datetime > reservation.start_datetime:
+            raise ValueError("A reservation cannot be cancelled after its start time.")
+
+    @staticmethod
+    @abstractmethod
     def cancel(reservation: Reservation, current_datetime: datetime) -> None:
         pass
 
 class StudentCancellation(CancellationPolicy):
     @staticmethod
     def cancel(reservation: Reservation, current_datetime: datetime) -> None:
-        pass
+        CancellationPolicy._validate_active(reservation)
+        CancellationPolicy._validate_before_start(reservation, current_datetime)
+        
+        system_config = SystemConfig.get_instance()
+        cancel_window = system_config.student_cancel_window
+
+        if reservation.start_datetime - current_datetime < cancel_window:
+            reservation.status = ReservationStatus.NO_SHOW
+            return
+
+        reservation.status = ReservationStatus.CANCELLED
+
 
 class CaptainCancellation(CancellationPolicy):
     @staticmethod
     def cancel(reservation: Reservation, current_datetime: datetime) -> None:
-        pass
+        CancellationPolicy._validate_active(reservation)
+        CancellationPolicy._validate_before_start(reservation, current_datetime)
+        
+        system_config = SystemConfig.get_instance()
+        cancel_window = system_config.captain_cancel_window
+
+        if reservation.start_datetime - current_datetime < cancel_window:
+            reservation.status = ReservationStatus.NO_SHOW
+            return
+
+        reservation.status = ReservationStatus.CANCELLED
+
 
 class AdminCancellation(CancellationPolicy):
     @staticmethod
     def cancel(reservation: Reservation, current_datetime: datetime) -> None:
-        pass
+        reservation.status = ReservationStatus.CANCELLED

@@ -4,14 +4,19 @@ from abc import ABC
 from datetime import datetime
 from typing import TYPE_CHECKING, Any, List
 
+from campus import CampusEnum
+from court import Court
+
 if TYPE_CHECKING:
     from reservation import Reservation
 
 class User(ABC):
-    def __init__(self, email: str, password: str) -> None:
-        self.email: str = email
-        self._password: str = password
-        self.logged_in: bool = False
+    def __init__(self, email: str, password: str, phone_number: str) -> None:
+        self.email = email
+        self._password = password
+        self.phone_number = phone_number
+        
+        self.logged_in = False
 
     def login(self, email: str, password: str) -> bool:
         self.logged_in = (
@@ -25,22 +30,24 @@ class User(ABC):
 
 
 class Student(User):
-    def __init__(self, email: str, password: str, student_code: str) -> None:
-        super().__init__(email, password)
-        self.student_code: str = student_code
-        self.reservations: List[Reservation] = []
+    def __init__(
+            self, 
+            email: str, 
+            password: str, 
+            phone_number: str, 
+            student_code: str, 
+            campus: CampusEnum
 
-    def request_reservation(self, court: Any, start_time: datetime, end_time: datetime, requested_at: datetime) -> None:
-        pass
+        ) -> None:
+        super().__init__(email, password, phone_number)
+        self.student_code = student_code
+        self.campus = campus
+
+        self.reservations: List[Reservation] = []
 
     def add_reservation(self, reservation: Reservation) -> None:
         self.reservations.append(reservation)
-
-    def get_upcoming_reservations(self, current_time: datetime) -> None:
-        pass
-
-    def cancel_reservation(self, reservation: Reservation, current_time: datetime) -> None:
-        pass
+        
 
 class Captain(Student):
     pass
