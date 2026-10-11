@@ -2,15 +2,18 @@ from __future__ import annotations
 
 from abc import ABC
 from datetime import datetime
-from typing import TYPE_CHECKING, List
+from typing import TYPE_CHECKING, ClassVar, List
 
 from campus import CampusEnum
 from court import Court
+from reservation import ReservationPriority
 
 if TYPE_CHECKING:
     from reservation import Reservation
 
 class User(ABC):
+    reservation_priority: ClassVar[ReservationPriority]
+
     def __init__(self, email: str, password: str, phone_number: str) -> None:
         self.email = email
         self._password = password
@@ -30,6 +33,8 @@ class User(ABC):
 
 
 class Student(User):
+    reservation_priority = ReservationPriority.STUDENT
+
     def __init__(
             self, 
             email: str, 
@@ -50,4 +55,4 @@ class Student(User):
 
 
 class Captain(Student):
-    pass
+    reservation_priority = ReservationPriority.CAPTAIN

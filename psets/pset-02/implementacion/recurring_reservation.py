@@ -1,55 +1,65 @@
 from court import Court
-from datetime import date, datetime, time
-from enum import IntEnum
+from datetime import date, datetime, time, timedelta
 from system_config import SystemConfig
-from typing import Optional
-
-
-class Weekday(IntEnum):
-    MONDAY = 1
-    TUESDAY = 2
-    WEDNESDAY = 3
-    THURSDAY = 4
-    FRIDAY = 5
-    SATURDAY = 6
-    SUNDAY = 7
-
+from typing import Optional, List
+from reservation import Reservation
+from reservation_factory import ReservationFactory
+from user import Captain
 
 class RecurringReservation:
     def __init__(
         self,
+        captain: Captain,
         court: Court,
-        weekday: Weekday,
+        start_date: date,
         start_time: time,
+        end_time: time,
         weeks_to_reserve: int,
         equipment: Optional[list[str]],
         notes: Optional[str],
     ) -> None:
+        self.captain = captain
         self.court = court
-        self.weekday = weekday
-        self.start_time = start_time
         self.weeks_to_reserve = weeks_to_reserve
         self.equipment = equipment
         self.notes = notes
+        self.reservations: List[Reservation]
+        self.start_date = start_date
+        self.start_time = start_time
+        self.end_time = end_time
 
-    def occurrence_on(self, year: int, week: int) -> datetime:
-        reservation_date = date.fromisocalendar(
-            year,
-            week,
-            self.weekday,
-        )
-        return datetime.combine(reservation_date, self.start_time)
 
-    def create_reservations(self):
-        pass
+    def create_reservations(self) -> Optional[List[Reservation]]:
+        reservations: List[Reservation] = []
+        start_recurring_datetime = datetime.combine(self.start_date, self.start_time)
+        end_recurring_datetime = datetime.combine(self.start_date, self.end_time)
+        reservation_factory = ReservationFactory()
+
+        for i in range(self.weeks_to_reserve):
+            start_datetime = start_recurring_datetime + timedelta(days=(7*i))
+            end_datetime =  end_recurring_datetime + timedelta(days=(7*i))
+
+            if self.court.has_conflict(start_datetime, end_datetime):
+                return None
+
+
+            reservation = reservation_factory.create(
+                self.captain, self.court, start_datetime, end_datetime, datetime.now()
+            )
+            
+            reservations.append(reservation)
+
+        return reservations
 
 
 class RecurringReservationBuilder:
     def __init__(
         self,
+        captain: Captain,
         court: Court,
-        weekday: Weekday,
+        start_date: date,
         start_time: time,
+        end_time: time,
         weeks_to_reserve: int
     ) -> None:
 
@@ -60,9 +70,14 @@ class RecurringReservationBuilder:
         if not min_weeks <= weeks_to_reserve <= max_weeks:
             raise ValueError(f"Recurring reservations must last {min_weeks} to {max_weeks} weeks.")
 
+        if end_time <= start_time:
+            raise ValueError("End time must be after start time")
+
+        self.captain = captain
         self.court = court
-        self.weekday = weekday
+        self.start_date = start_date
         self.start_time = start_time
+        self.end_time = end_time
         self.weeks_to_reserve = weeks_to_reserve
         self.equipment: list[str] = []
         self.notes: Optional[str] = None
@@ -77,9 +92,11 @@ class RecurringReservationBuilder:
 
     def build(self) -> RecurringReservation:
         return RecurringReservation(
+            self.captain,
             self.court,
-            self.weekday,
+            self.start_date,
             self.start_time,
+            self.end_time,
             self.weeks_to_reserve,
             self.equipment,
             self.notes,

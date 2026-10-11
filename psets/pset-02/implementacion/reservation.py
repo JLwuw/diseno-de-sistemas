@@ -6,8 +6,6 @@ from datetime import timedelta
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any, Optional
 
-from campus import CampusEnum
-
 if TYPE_CHECKING:
     from user import Student
 
@@ -17,6 +15,12 @@ from cancellation import (
     CaptainCancellation,
     StudentCancellation,
 )
+
+
+class ReservationPriority(IntEnum):
+    ADMIN = 0
+    CAPTAIN = 1
+    STUDENT = 2
 
 
 class ReservationStatus(IntEnum):
@@ -31,7 +35,6 @@ class Reservation(ABC):
         self,
         student: Student,
         court: Any,
-        campus: CampusEnum,
         start_datetime: datetime,
         end_datetime: datetime,
         requested_at: datetime,
@@ -39,14 +42,20 @@ class Reservation(ABC):
     ) -> None:
         if end_datetime <= start_datetime:
             raise ValueError("The reservation must end after it starts.")
+        
+        if start_datetime.date() != end_datetime.date():
+            raise ValueError("Reservations must only span a single day")
+        
         self.student = student
         self.court = court
-        self.campus = campus
         self.start_datetime = start_datetime
         self.end_datetime = end_datetime
         self.requested_at = requested_at
         self.status = ReservationStatus.ACTIVE
         self.cancellation_policy = cancellation_policy
+
+    def priority(self) -> ReservationPriority:
+        return self.student.reservation_priority
 
     def cancel(self, current_time: datetime, policy: Optional[CancellationPolicy] = None) -> None:
         cancellation_policy = policy or self.cancellation_policy
@@ -90,13 +99,12 @@ class StudentReservation(Reservation):
         self,
         student: Student,
         court: Any,
-        campus: CampusEnum,
         start_time: datetime,
         end_time: datetime,
         requested_at: datetime,
     ) -> None:
         cancellation_policy = StudentCancellation()
-        super().__init__(student, court, campus, start_time, end_time, requested_at, cancellation_policy)
+        super().__init__(student, court, start_time, end_time, requested_at, cancellation_policy)
 
 
 class CaptainReservation(Reservation):
@@ -104,10 +112,9 @@ class CaptainReservation(Reservation):
         self,
         student: Student,
         court: Any,
-        campus: CampusEnum,
         start_time: datetime,
         end_time: datetime,
         requested_at: datetime,
     ) -> None:
         cancellation_policy = CaptainCancellation()
-        super().__init__(student, court, campus, start_time, end_time, requested_at, cancellation_policy)
+        super().__init__(student, court, start_time, end_time, requested_at, cancellation_policy)

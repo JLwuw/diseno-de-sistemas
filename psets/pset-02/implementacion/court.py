@@ -4,8 +4,10 @@ from datetime import datetime
 from enum import IntEnum
 from typing import TYPE_CHECKING, List
 
+from reservation import Reservation, ReservationStatus
+from court_schedule import CourtSchedule
+
 if TYPE_CHECKING:
-    from reservation import Reservation, ReservationStatus
     from campus import CampusEnum
 
 
@@ -15,33 +17,40 @@ class CourtStatus(IntEnum):
 
 
 class Court:
-    def __init__(self, name: str, status: CourtStatus) -> None:
+    def __init__(
+        self,
+        name: str,
+        campus: CampusEnum,
+        schedule: CourtSchedule,
+        status: CourtStatus = CourtStatus.MAINTENANCE,
+    ) -> None:
         self.name = name
+        self.campus = campus
         self.status = status
+        self.schedule = schedule
         self.reservations: List[Reservation] = []
 
-    def is_available(self, start_datetime: datetime, end_datetime: datetime, campus: CampusEnum) -> bool:
+    def is_available(self, start_datetime: datetime, end_datetime: datetime) -> bool:
         return (
             self.status is CourtStatus.AVAILABLE
-            and not self.has_conflict(start_datetime, end_datetime, campus)
+            and self.schedule.is_available(start_datetime, end_datetime)
+            and not self.has_conflict(start_datetime, end_datetime)
         )
 
-    def has_conflict(self, start_datetime: datetime, end_datetime: datetime, campus: CampusEnum) -> bool:
+    def has_conflict(self, start_datetime: datetime, end_datetime: datetime) -> bool:
         return any(
-            reservation.campus == campus
-            and reservation.status == ReservationStatus.ACTIVE
+            reservation.status == ReservationStatus.ACTIVE
             and reservation.overlaps(start_datetime, end_datetime)
             for reservation in self.reservations
         )
 
-    def get_conflicting_reservations(self, start_datetime: datetime, end_datetime: datetime, campus: CampusEnum) -> List[Reservation]:
-        conflicting = []
-
-        for reservation in self.reservations:
-            if self.has_conflict(start_datetime, end_datetime, campus):
-                conflicting.append(reservation)
-
-        return conflicting
+    def get_conflicting_reservations(self, start_datetime: datetime, end_datetime: datetime) -> List[Reservation]:
+        return [
+            reservation
+            for reservation in self.reservations
+            if reservation.status == ReservationStatus.ACTIVE
+            and reservation.overlaps(start_datetime, end_datetime)
+        ]
 
     def add_reservation(self, reservation: Reservation) -> None:
         if reservation.court is not self:
@@ -49,8 +58,7 @@ class Court:
 
         start_datetime = reservation.start_datetime
         end_datetime = reservation.end_datetime
-        campus = reservation.campus
-        if not self.is_available(start_datetime, end_datetime, campus):
+        if not self.is_available(start_datetime, end_datetime):
             raise ValueError("The court is not available for that time.")
         
         self.reservations.append(reservation)
