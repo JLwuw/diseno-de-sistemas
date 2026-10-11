@@ -5,7 +5,7 @@ from enum import IntEnum
 from typing import TYPE_CHECKING, List
 
 if TYPE_CHECKING:
-    from reservation import Reservation
+    from reservation import Reservation, ReservationStatus
     from campus import CampusEnum
 
 
@@ -29,9 +29,19 @@ class Court:
     def has_conflict(self, start_datetime: datetime, end_datetime: datetime, campus: CampusEnum) -> bool:
         return any(
             reservation.campus == campus
+            and reservation.status == ReservationStatus.ACTIVE
             and reservation.overlaps(start_datetime, end_datetime)
             for reservation in self.reservations
         )
+
+    def get_conflicting_reservations(self, start_datetime: datetime, end_datetime: datetime, campus: CampusEnum) -> List[Reservation]:
+        conflicting = []
+
+        for reservation in self.reservations:
+            if self.has_conflict(start_datetime, end_datetime, campus):
+                conflicting.append(reservation)
+
+        return conflicting
 
     def add_reservation(self, reservation: Reservation) -> None:
         if reservation.court is not self:

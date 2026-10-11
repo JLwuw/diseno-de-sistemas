@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from abc import ABC
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, List
+from typing import TYPE_CHECKING, List
 
 from campus import CampusEnum
 from court import Court
@@ -47,7 +47,7 @@ class Student(User):
 
     def add_reservation(self, reservation: Reservation) -> None:
         self.reservations.append(reservation)
-        
+
 
 class Captain(Student):
     pass
