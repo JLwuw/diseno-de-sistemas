@@ -16,7 +16,7 @@ The implementation uses a pessimistic approach. `SportsComplexFacade` acquires a
 
 The tradeoff is that competing requests are processed one by one, depending on which one has the lock, reducing the amount of requests processed at the same time
 
-## Design Patterns and Requirements
+## Design Patterns Table
 
 | Design pattern used | Matching requirement | Problem it solves | Classes and methods involved |
 |---|---|---|---|

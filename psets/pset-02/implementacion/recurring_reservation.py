@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from court import Court
 from datetime import date, datetime, time, timedelta
 from system_config import SystemConfig
