@@ -51,7 +51,7 @@ class Admin(User):
         if court not in self.courts:
             raise ValueError("The administrator does not manage this court.")
 
-        return admin_block.copy().apply_to(court, date)
+        return admin_block.copy().apply_to(court, date, self)
 
 
 class AdminBlock():
@@ -75,6 +75,7 @@ class AdminBlock():
         self,
         court: Court,
         date: date,
+        admin: Admin,
     ) -> tuple[ForcedCancellationEvent, ...]:
         start_datetime = datetime.combine(date, self.start_time)
         end_datetime = datetime.combine(date, self.end_time)
@@ -84,6 +85,7 @@ class AdminBlock():
         events = []
         for reservation in conflicts:
             event = reservation.force_cancel(
+                admin,
                 datetime.now(),
                 reason=f"Administrative block: {self.motive}",
             )

@@ -5,10 +5,11 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from system_config import SystemConfig
+from reservation_status import ReservationStatus
 
 if TYPE_CHECKING:
     from reservation import Reservation
-    from reservation_status import ReservationStatus
+    from user import User
 else:
     from reservation_status import ReservationStatus
 
@@ -20,19 +21,29 @@ class CancellationPolicy(ABC):
             raise ValueError("Only active reservations can be cancelled.")
 
     @staticmethod
+    def _validate_owner(user: User, reservation: Reservation) -> None:
+        if reservation.student is not user:
+            raise PermissionError("Users may only cancel their own reservations.")
+
+    @staticmethod
     def _validate_before_start(reservation: Reservation, current_datetime: datetime) -> None:
         if current_datetime > reservation.start_datetime:
             raise ValueError("A reservation cannot be cancelled after its start time.")
 
     @staticmethod
     @abstractmethod
-    def cancel(reservation: Reservation, current_datetime: datetime) -> None:
+    def cancel(
+        user: User,
+        reservation: Reservation,
+        current_datetime: datetime,
+    ) -> None:
         pass
 
 
 class StudentCancellation(CancellationPolicy):
     @staticmethod
-    def cancel(reservation: Reservation, current_datetime: datetime) -> None:
+    def cancel(user: User, reservation: Reservation, current_datetime: datetime) -> None:
+        CancellationPolicy._validate_owner(user, reservation)
         CancellationPolicy._validate_active(reservation)
         CancellationPolicy._validate_before_start(reservation, current_datetime)
         
@@ -49,7 +60,8 @@ class StudentCancellation(CancellationPolicy):
 
 class CaptainCancellation(CancellationPolicy):
     @staticmethod
-    def cancel(reservation: Reservation, current_datetime: datetime) -> None:
+    def cancel(user: User, reservation: Reservation, current_datetime: datetime) -> None:
+        CancellationPolicy._validate_owner(user, reservation)
         CancellationPolicy._validate_active(reservation)
         CancellationPolicy._validate_before_start(reservation, current_datetime)
         
@@ -66,5 +78,5 @@ class CaptainCancellation(CancellationPolicy):
 
 class AdminCancellation(CancellationPolicy):
     @staticmethod
-    def cancel(reservation: Reservation, current_datetime: datetime) -> None:
+    def cancel(user: User, reservation: Reservation, current_datetime: datetime) -> None:
         reservation.status = ReservationStatus.CANCELLED

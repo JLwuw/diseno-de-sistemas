@@ -9,7 +9,7 @@ from typing import TYPE_CHECKING, Any, Optional
 from reservation_status import ReservationStatus
 
 if TYPE_CHECKING:
-    from user import Student
+    from user import Student, User
 
 from cancellation_policy import (
     AdminCancellation,
@@ -60,16 +60,23 @@ class Reservation(ABC):
     def priority(self) -> ReservationPriority:
         return self.student.reservation_priority
 
-    def cancel(self, current_time: datetime, policy: Optional[CancellationPolicy] = None) -> None:
+    def cancel(
+        self,
+        user: User,
+        current_time: datetime,
+        policy: Optional[CancellationPolicy] = None,
+    ) -> None:
         cancellation_policy = policy or self.cancellation_policy
-        cancellation_policy.cancel(self, current_time)
+        cancellation_policy.cancel(user, self, current_time)
 
     def force_cancel(
         self,
+        actor: User,
         current_time: datetime,
         reason: str = "Administrative cancellation",
     ) -> ForcedCancellationEvent:
         self.cancel(
+            actor,
             current_time,
             policy=AdminCancellation()
         )

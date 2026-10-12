@@ -2,9 +2,21 @@ from court import Court
 from datetime import date, datetime, time, timedelta
 from system_config import SystemConfig
 from typing import Optional, List
+from dataclasses import dataclass
 from reservation import Reservation
 from reservation_factory import ReservationFactory
 from user import Captain
+
+
+@dataclass(frozen=True)
+class RecurringReservationResult:
+    reservations: tuple[Reservation, ...]
+    conflicting_weeks: tuple[int, ...]
+
+    @property
+    def approved(self) -> bool:
+        return not self.conflicting_weeks
+
 
 class RecurringReservation:
     def __init__(
@@ -29,8 +41,9 @@ class RecurringReservation:
         self.end_time = end_time
 
 
-    def create_reservations(self) -> Optional[List[Reservation]]:
+    def create_reservations(self) -> RecurringReservationResult:
         reservations: List[Reservation] = []
+        conflicting_weeks: list[int] = []
         start_recurring_datetime = datetime.combine(self.start_date, self.start_time)
         end_recurring_datetime = datetime.combine(self.start_date, self.end_time)
         reservation_factory = ReservationFactory()
@@ -40,7 +53,8 @@ class RecurringReservation:
             end_datetime =  end_recurring_datetime + timedelta(days=(7*i))
 
             if self.court.has_conflict(start_datetime, end_datetime):
-                return None
+                conflicting_weeks.append(i + 1)
+                continue
 
 
             reservation = reservation_factory.create(
@@ -49,7 +63,10 @@ class RecurringReservation:
             
             reservations.append(reservation)
 
-        return reservations
+        if conflicting_weeks:
+            return RecurringReservationResult((), tuple(conflicting_weeks))
+
+        return RecurringReservationResult(tuple(reservations), ())
 
 
 class RecurringReservationBuilder:
