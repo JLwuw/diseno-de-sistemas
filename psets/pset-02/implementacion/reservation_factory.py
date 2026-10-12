@@ -15,11 +15,13 @@ class ReservationFactory:
         requested_at: datetime
     ) -> Reservation:
         if isinstance(student, Captain):
+            print("[Factory] Creating CaptainReservation")
             return CaptainReservation(
                 student, court, start_datetime, end_datetime, requested_at
             )
 
         if isinstance(student, Student):
+            print("[Factory] Creating StudentReservation")
             return StudentReservation(
                 student, court, start_datetime, end_datetime, requested_at
             )

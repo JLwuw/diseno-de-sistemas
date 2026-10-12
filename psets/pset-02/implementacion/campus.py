@@ -80,18 +80,22 @@ class CampusFactory(ABC):
 class NorthCampusFactory(CampusFactory):
     @staticmethod
     def get_time_validator() -> TimeValidator:
+        print("[Abstract Factory] Selecting NorthCampusTimeValidator")
         return NorthCampusTimeValidator()
 
     @staticmethod
     def get_notification_sender() -> NotificationSender:
+        print("[Abstract Factory] Selecting NorthCampusNotificationSender")
         return NorthCampusNotificationSender()
 
 
 class SouthCampusFactory(CampusFactory):
     @staticmethod
     def get_time_validator() -> TimeValidator:
+        print("[Abstract Factory] Selecting SouthCampusTimeValidator")
         return SouthCampusTimeValidator()
 
     @staticmethod
     def get_notification_sender() -> NotificationSender:
+        print("[Abstract Factory] Selecting SouthCampusNotificationSender")
         return SouthCampusNotificationSender()

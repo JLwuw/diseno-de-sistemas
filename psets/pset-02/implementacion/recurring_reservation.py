@@ -82,6 +82,7 @@ class RecurringReservationBuilder:
         weeks_to_reserve: int
     ) -> None:
 
+        print("[Builder] Validating recurring reservation parameters")
         system_config = SystemConfig.get_instance()
         min_weeks = system_config.min_recurring_reservation_weeks
         max_weeks = system_config.max_recurring_reservation_weeks
@@ -100,16 +101,20 @@ class RecurringReservationBuilder:
         self.weeks_to_reserve = weeks_to_reserve
         self.equipment: list[str] = []
         self.notes: Optional[str] = None
+        print("[Builder] RecurringReservationBuilder initialized")
 
     def with_equipment(self, equipment: list[str]) -> RecurringReservationBuilder:
+        print(f"[Builder] Adding equipment request: {equipment}")
         self.equipment = equipment
         return self
 
     def with_notes(self, notes: str) -> RecurringReservationBuilder:
+        print("[Builder] Adding concierge notes")
         self.notes = notes
         return self
 
     def build(self) -> RecurringReservation:
+        print("[Builder] Building RecurringReservation")
         return RecurringReservation(
             self.captain,
             self.court,

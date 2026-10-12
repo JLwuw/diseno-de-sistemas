@@ -51,6 +51,7 @@ class Admin(User):
         if court not in self.courts:
             raise ValueError("The administrator does not manage this court.")
 
+        print(f"[Prototype] Admin cloning block for {court.name} on {date}")
         return admin_block.copy().apply_to(court, date, self)
 
 
@@ -69,6 +70,7 @@ class AdminBlock():
 
 
     def copy(self) -> AdminBlock:
+        print("[Prototype] Deep-copying reusable AdminBlock template")
         return deepcopy(self)
 
     def apply_to(
@@ -77,6 +79,7 @@ class AdminBlock():
         date: date,
         admin: Admin,
     ) -> tuple[ForcedCancellationEvent, ...]:
+        print(f"[Prototype] Applying block '{self.motive}' to {court.name}")
         start_datetime = datetime.combine(date, self.start_time)
         end_datetime = datetime.combine(date, self.end_time)
 

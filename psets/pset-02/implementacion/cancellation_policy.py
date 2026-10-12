@@ -43,6 +43,7 @@ class CancellationPolicy(ABC):
 class StudentCancellation(CancellationPolicy):
     @staticmethod
     def cancel(user: User, reservation: Reservation, current_datetime: datetime) -> None:
+        print("[Strategy] StudentCancellation applying two-hour rule")
         CancellationPolicy._validate_owner(user, reservation)
         CancellationPolicy._validate_active(reservation)
         CancellationPolicy._validate_before_start(reservation, current_datetime)
@@ -51,16 +52,19 @@ class StudentCancellation(CancellationPolicy):
         cancel_window = system_config.student_cancel_window
 
         if reservation.start_datetime - current_datetime < cancel_window:
+            print("[Strategy] Cancellation becomes NO_SHOW")
             reservation.status = ReservationStatus.NO_SHOW
             reservation.no_show_at = current_datetime
             return
 
         reservation.status = ReservationStatus.CANCELLED
+        print("[Strategy] Cancellation recorded as CANCELLED")
 
 
 class CaptainCancellation(CancellationPolicy):
     @staticmethod
     def cancel(user: User, reservation: Reservation, current_datetime: datetime) -> None:
+        print("[Strategy] CaptainCancellation applying 24-hour rule")
         CancellationPolicy._validate_owner(user, reservation)
         CancellationPolicy._validate_active(reservation)
         CancellationPolicy._validate_before_start(reservation, current_datetime)
@@ -69,14 +73,17 @@ class CaptainCancellation(CancellationPolicy):
         cancel_window = system_config.captain_cancel_window
 
         if reservation.start_datetime - current_datetime < cancel_window:
+            print("[Strategy] Cancellation becomes NO_SHOW")
             reservation.status = ReservationStatus.NO_SHOW
             reservation.no_show_at = current_datetime
             return
 
         reservation.status = ReservationStatus.CANCELLED
+        print("[Strategy] Cancellation recorded as CANCELLED")
 
 
 class AdminCancellation(CancellationPolicy):
     @staticmethod
     def cancel(user: User, reservation: Reservation, current_datetime: datetime) -> None:
+        print("[Strategy] AdminCancellation bypassing user penalty")
         reservation.status = ReservationStatus.CANCELLED

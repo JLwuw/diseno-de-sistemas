@@ -18,5 +18,8 @@ class SystemConfig:
     @staticmethod
     def get_instance() -> SystemConfig:
         if SystemConfig._instance is None:
+            print("[Singleton] Creating the shared SystemConfig instance")
             SystemConfig._instance = SystemConfig()
+        else:
+            print("[Singleton] Reusing the shared SystemConfig instance")
         return SystemConfig._instance

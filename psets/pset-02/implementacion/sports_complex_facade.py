@@ -67,6 +67,7 @@ class SportsComplexFacade:
         end_datetime: datetime,
         requested_at: Optional[datetime] = None,
     ) -> Reservation:
+        print(f"[Facade] Starting reservation request for {user.email}")
         self._require_authenticated(user)
         requested_at = requested_at or datetime.now()
 
@@ -79,6 +80,7 @@ class SportsComplexFacade:
                 end_datetime,
                 requested_at,
             )
+            print(f"[Facade] Policy decision: approved={decision.approved}")
             self._require_approved(decision)
 
             for conflict in decision.reservations_to_force_cancel:
@@ -97,6 +99,7 @@ class SportsComplexFacade:
                 requested_at,
             )
             court.add_reservation(reservation)
+            print(f"[Facade] Reservation stored on {court.name}")
             self._record("reservation_created", user, requested_at, reservation)
             return reservation
 
@@ -106,6 +109,7 @@ class SportsComplexFacade:
         reservation: Reservation,
         current_datetime: Optional[datetime] = None,
     ) -> None:
+        print(f"[Facade] Starting cancellation request for {user.email}")
         self._require_authenticated(user)
         if reservation.student is not user:
             raise PermissionError("Users may only cancel their own reservations.")
@@ -119,6 +123,7 @@ class SportsComplexFacade:
                 else "reservation_cancelled"
             )
             self._record(action, user, current_datetime, reservation)
+            print(f"[Facade] Cancellation flow completed: {action}")
 
     def finish_reservation(
         self,
@@ -173,6 +178,7 @@ class SportsComplexFacade:
         recurring: RecurringReservation,
         requested_at: Optional[datetime] = None,
     ) -> RecurringReservationResult:
+        print("[Facade] Starting recurring reservation workflow")
         self._require_authenticated(recurring.captain)
         requested_at = requested_at or datetime.now()
 
@@ -208,6 +214,7 @@ class SportsComplexFacade:
                 occurrences.append((start_datetime, end_datetime))
 
             if conflicting_weeks:
+                print(f"[Facade] Recurring request rejected for weeks {conflicting_weeks}")
                 return RecurringReservationResult((), tuple(conflicting_weeks))
 
             reservations = tuple(
@@ -232,6 +239,7 @@ class SportsComplexFacade:
                         f"notes={recurring.notes!r}"
                     ),
                 )
+            print(f"[Facade] Recurring workflow committed {len(reservations)} reservations")
             return RecurringReservationResult(reservations, ())
 
     def create_court(
@@ -242,6 +250,7 @@ class SportsComplexFacade:
         schedule: CourtSchedule,
         status: CourtStatus = CourtStatus.AVAILABLE,
     ) -> Court:
+        print(f"[Facade] Admin creating court {name} at {campus.name} campus")
         self._require_admin(admin)
         court = Court(name, campus, schedule, status)
         admin.add_court(court)
@@ -312,6 +321,7 @@ class SportsComplexFacade:
         court: Court,
         target_date: date,
     ) -> tuple[ForcedCancellationEvent, ...]:
+        print(f"[Facade] Admin applying block to {court.name}")
         self._require_managed_court(admin, court)
         with self._lock:
             start_datetime = datetime.combine(target_date, block.start_time)
