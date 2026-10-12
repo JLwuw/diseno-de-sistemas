@@ -4,11 +4,13 @@ from datetime import datetime
 from enum import IntEnum
 from typing import TYPE_CHECKING, List
 
-from reservation import Reservation, ReservationStatus
+from reservation import Reservation
+from reservation_status import ReservationStatus
 from court_schedule import CourtSchedule
 
 if TYPE_CHECKING:
     from campus import CampusEnum
+    from reservation import Reservation
 
 
 class CourtStatus(IntEnum):

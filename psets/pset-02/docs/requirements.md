@@ -24,7 +24,7 @@ RF-07 through 18 and NFR-06 through 07 are new
 
 ### Recurring Reservations
 
-- **RF-10:** The system must allow official team captains to create recurring reservations for the same court, day, and time for up to 8 weeks at a time.
+- **RF-10:** The system must allow official team captains to create recurring reservations for the same court, day, and time for at least 2 weeks and up to 8 weeks at a time.
 - **RF-11:** A recurring reservation may include requests for specific equipment, such as balls or nets, and additional notes for the concierge.
 - **RF-12:** If any occurrence of a recurring reservation is unavailable, the system must reject the entire recurring reservation.
 

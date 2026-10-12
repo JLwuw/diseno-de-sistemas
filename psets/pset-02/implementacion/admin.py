@@ -6,9 +6,9 @@ from court import Court, CourtStatus
 from copy import deepcopy
 
 from user import User
-from reservation import Reservation
+from reservation import ForcedCancellationEvent, Reservation
 from reservation import ReservationPriority
-from schedule import CourtSchedule
+from court_schedule import CourtSchedule
 
 class Admin(User):
     reservation_priority = ReservationPriority.ADMIN
@@ -42,12 +42,17 @@ class Admin(User):
             raise ValueError("At least one request is required.")
         return min(reservations, key=lambda reservation: reservation.priority())
 
-    def apply_block(self, admin_block: AdminBlock, court: Court, date: date):
+    def apply_block(
+        self,
+        admin_block: AdminBlock,
+        court: Court,
+        date: date,
+    ) -> tuple[ForcedCancellationEvent, ...]:
         if court not in self.courts:
             raise ValueError("The administrator does not manage this court.")
 
-        admin_block.apply_to(court, date)
-    
+        return admin_block.copy().apply_to(court, date)
+
 
 class AdminBlock():
     def __init__(
@@ -66,13 +71,24 @@ class AdminBlock():
     def copy(self) -> AdminBlock:
         return deepcopy(self)
 
-    def apply_to(self, court: Court, date: date):
+    def apply_to(
+        self,
+        court: Court,
+        date: date,
+    ) -> tuple[ForcedCancellationEvent, ...]:
         start_datetime = datetime.combine(date, self.start_time)
         end_datetime = datetime.combine(date, self.end_time)
 
         conflicts = court.get_conflicting_reservations(start_datetime, end_datetime)
 
+        events = []
         for reservation in conflicts:
-            reservation.force_cancel(datetime.now())
+            event = reservation.force_cancel(
+                datetime.now(),
+                reason=f"Administrative block: {self.motive}",
+            )
+            events.append(event)
+        
+        return tuple(events)
 
     

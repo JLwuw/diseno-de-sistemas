@@ -10,7 +10,7 @@ class SystemConfig:
         self.captain_priority_end_time: time = time(hour=18)
         self.student_cancel_window: timedelta = timedelta(hours=2)
         self.captain_cancel_window: timedelta = timedelta(hours=24)
-        self.noshow_monthly_limit: int = 3
+        self.no_show_monthly_limit: int = 3
         self.suspension_time = timedelta(days=7)
 
     @staticmethod

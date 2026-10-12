@@ -1,15 +1,17 @@
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from datetime import datetime
 from datetime import timedelta
 from enum import IntEnum
 from typing import TYPE_CHECKING, Any, Optional
+from reservation_status import ReservationStatus
 
 if TYPE_CHECKING:
     from user import Student
 
-from cancellation import (
+from cancellation_policy import (
     AdminCancellation,
     CancellationPolicy,
     CaptainCancellation,
@@ -23,11 +25,11 @@ class ReservationPriority(IntEnum):
     STUDENT = 2
 
 
-class ReservationStatus(IntEnum):
-    ACTIVE = 0
-    FINISHED = 1
-    CANCELLED = 2
-    NO_SHOW = 3
+@dataclass(frozen=True)
+class ForcedCancellationEvent:
+    reservation: Reservation
+    reason: str
+    occurred_at: datetime
 
 
 class Reservation(ABC):
@@ -52,6 +54,7 @@ class Reservation(ABC):
         self.end_datetime = end_datetime
         self.requested_at = requested_at
         self.status = ReservationStatus.ACTIVE
+        self.no_show_at: Optional[datetime] = None
         self.cancellation_policy = cancellation_policy
 
     def priority(self) -> ReservationPriority:
@@ -61,11 +64,16 @@ class Reservation(ABC):
         cancellation_policy = policy or self.cancellation_policy
         cancellation_policy.cancel(self, current_time)
 
-    def force_cancel(self, current_time: datetime) -> None:
+    def force_cancel(
+        self,
+        current_time: datetime,
+        reason: str = "Administrative cancellation",
+    ) -> ForcedCancellationEvent:
         self.cancel(
             current_time,
             policy=AdminCancellation()
         )
+        return ForcedCancellationEvent(self, reason, current_time)
 
     def finish(self, current_datetime: datetime) -> None:
         if self.status is not ReservationStatus.ACTIVE:

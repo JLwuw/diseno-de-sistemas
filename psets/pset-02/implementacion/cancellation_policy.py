@@ -5,10 +5,12 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from system_config import SystemConfig
-from reservation import ReservationStatus
 
 if TYPE_CHECKING:
     from reservation import Reservation
+    from reservation_status import ReservationStatus
+else:
+    from reservation_status import ReservationStatus
 
 
 class CancellationPolicy(ABC):
@@ -27,6 +29,7 @@ class CancellationPolicy(ABC):
     def cancel(reservation: Reservation, current_datetime: datetime) -> None:
         pass
 
+
 class StudentCancellation(CancellationPolicy):
     @staticmethod
     def cancel(reservation: Reservation, current_datetime: datetime) -> None:
@@ -38,6 +41,7 @@ class StudentCancellation(CancellationPolicy):
 
         if reservation.start_datetime - current_datetime < cancel_window:
             reservation.status = ReservationStatus.NO_SHOW
+            reservation.no_show_at = current_datetime
             return
 
         reservation.status = ReservationStatus.CANCELLED
@@ -54,6 +58,7 @@ class CaptainCancellation(CancellationPolicy):
 
         if reservation.start_datetime - current_datetime < cancel_window:
             reservation.status = ReservationStatus.NO_SHOW
+            reservation.no_show_at = current_datetime
             return
 
         reservation.status = ReservationStatus.CANCELLED

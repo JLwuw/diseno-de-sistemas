@@ -28,10 +28,7 @@ class TimeBracket:
         return self.start_time <= start_time and end_time <= self.end_time
     
     def overlaps(self, start_time: time, end_time: time) -> bool:
-        return (
-            self.start_time < start_time < self.end_time 
-            or self.start_time < end_time < self.end_time 
-        )
+        return start_time < self.end_time and end_time > self.start_time
 
 
 class CourtSchedule:
@@ -53,6 +50,11 @@ class CourtSchedule:
         self._brackets[weekday].remove(bracket)
 
     def is_available(self, start_datetime: datetime, end_datetime: datetime) -> bool:
+        if end_datetime <= start_datetime:
+            return False
+        if start_datetime.date() != end_datetime.date():
+            return False
+
         weekday = Weekday(start_datetime.weekday())
         return any(
             bracket.contains(start_datetime.time(), end_datetime.time())
